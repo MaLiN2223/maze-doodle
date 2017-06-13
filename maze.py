@@ -3,7 +3,7 @@ import pygame
 import random
     
 wall = "*"
-size = 20
+size = 5
 
 WHITE = (255,255,255)
 BLACK = (0,0,0)
@@ -140,7 +140,7 @@ class Maze:
     def __init__(self,length,height):
         self.length = length
         self.height = height
-        self.board = [[Tile() for i in range(length)] for j in range(height)]
+        self.board = [[Tile() for j in range(length)] for i in range(height)]
         for i in range(height):
             for j in range(length):
                 self.board[i][j] = Tile()
@@ -156,9 +156,10 @@ class Maze:
         
 
     def print(self,surface):
+        start = Vector(10,10)
         for i in range(self.height):
             for j in range(self.length): 
-                self.board[i][j].draw(Vector(i*size,j*size),surface)
+                self.board[i][j].draw(start+Vector(i*size,j*size),surface)
 
     def randomize(self,surface):
         stack = Stack()
@@ -175,8 +176,7 @@ class Maze:
                 print(stack.size)
                 if stack.size > 0:
                     current = stack.pop()
-                else:
-                    print("OKDONE")
+                else: 
                     raise StopIteration()
             else:                
                 next,x = q
@@ -185,28 +185,36 @@ class Maze:
                 next.unlock((x+2)%4)  
                 current = next
             yield current
-    def randomizeExits(self):
-        pass
             
+    def randomizeExits(self):
+        entrance = random.randrange(self.length)
+        exit = random.randrange(self.length)
+        self.board[entrance][0].unlock(Direction.Up) 
+        self.board[exit][self.height-1].unlock(Direction.Down)
+        \   
                 
 pygame.init()
 screen = pygame.display.set_mode((800,600))
 done = False
 
-maze = Maze(25,25)
+maze = Maze(100,100)
 generator = maze.randomize(screen)
+maze.randomizeExits()
+try:
+    while next(generator):
+        pass
+        #screen.fill(WHITE)
+        #maze.print(screen)
+        #pygame.display.flip()
+except StopIteration:
+    pass
 while not done:
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                         done = True
         
-        screen.fill(WHITE)
-        try:
-            next(generator)
-        except StopIteration:
-            pass
-        maze.print(screen)
-        #pygame.time.wait(100)
+        screen.fill(WHITE) 
+        maze.print(screen) 
         pygame.display.flip()
 
 pygame.quit()
