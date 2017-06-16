@@ -1,4 +1,3 @@
-
 import random
 from tile import Tile
 from direction import Direction
@@ -10,20 +9,27 @@ class Maze:
     def __init__(self, length, height):
         self.length = length
         self.height = height
-        self.board = [[Tile() for j in range(length)] for i in range(height)]
-
-        for i in range(height):
-            for j in range(length):
-                self.board[i][j] = Tile()
-
-        for i in range(height):
-            for j in range(length):
-                if i < height - 1:
+        self.board = [[Tile() for j in range(self.length)] for i in range(self.height)]
+        for i in range(self.height):
+            for j in range(self.length):
+                if i < self.height - 1:
                     self.board[i][j].right = self.board[i + 1][j]
                     self.board[i + 1][j].left = self.board[i][j]
-                if j < length - 1:
+                if j < self.length - 1:
                     self.board[i][j].down = self.board[i][j + 1]
                     self.board[i][j + 1].up = self.board[i][j]
+
+        self.init()
+
+    def init(self):
+        self.entrance = None
+        self.exit = None
+
+        for i in range(self.height):
+            for j in range(self.length):
+                self.board[i][j].clear_walls()
+                self.board[i][j].visited = False
+
 
     def display(self, surface):
         offset = Vector(*MAZEOFFSET)
@@ -62,7 +68,7 @@ class Maze:
 
     @staticmethod
     def randomize_exits(maze):
-        entrance = random.randrange(maze.length)
-        exit = random.randrange(maze.length)
-        maze.board[entrance][0].unlock(Direction.Up)
-        maze.board[exit][maze.height - 1].unlock(Direction.Down)
+        maze.entrance = random.randrange(maze.length)
+        maze.exit = random.randrange(maze.length)
+        maze.board[maze.entrance][0].unlock(Direction.Up)
+        maze.board[maze.exit][maze.height - 1].unlock(Direction.Down)
